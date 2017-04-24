@@ -1,0 +1,78 @@
+version: "2"
+
+services:
+  nginx:
+    restart: always
+    image: nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/etc/nginx/conf.d"
+      - "/etc/nginx/vhost.d"
+      - "/usr/share/nginx/html"
+      - "./volumes/proxy/certs:/etc/nginx/certs:ro"
+
+  nginx-gen:
+    restart: always
+    image: jwilder/docker-gen
+    container_name: nginx-gen
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+      - "./volumes/proxy/templates/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro"
+    volumes_from:
+      - nginx
+    entrypoint: /usr/local/bin/docker-gen -notify-sighup nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+
+  letsencrypt-nginx-proxy-companion:
+    restart: always
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt-nginx-proxy-companion
+    volumes_from:
+      - nginx
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./volumes/proxy/certs:/etc/nginx/certs:rw"
+    environment:
+      - NGINX_DOCKER_GEN_CONTAINER=nginx-gen
+      
+  tidyverse:
+    restart: always
+    image: rocker/tidyverse
+    container_name: rstudio
+    expose:
+      - "8787"
+    environment:
+      - VIRTUAL_HOST=rstudio_test.56n.dk
+      - VIRTUAL_NETWORK=nginx-proxy
+      - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=rstudio_test.56n.dk
+      - LETSENCRYPT_EMAIL=mikkel@56n.dk
+      - USER=test
+      - PASSWORD=test
+    volumes:
+      - shiny-apps:/home/test/apps
+      - r-packages:/usr/local/lib/R/site-library
+
+  shiny:
+    restart: always
+    image: rocker/shiny
+    container_name: shiny
+    expose:
+      - "3838"
+    environment:
+      - VIRTUAL_HOST=shiny_test.56n.dk
+      - VIRTUAL_NETWORK=nginx-proxy
+      - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=shiny_test.56n.dk
+      - LETSENCRYPT_EMAIL=mikkel@56n.dk
+    volumes:
+      - shiny-apps:/srv/shiny-server/
+      - ./volumes/shiny/logs:/var/log/
+      - r-packages:/usr/local/lib/R/site-library
+
+volumes:
+  shiny-apps:
+  r-packages:
+
