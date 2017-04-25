@@ -1,10 +1,30 @@
 # Docker + Nginx + Let's Encrypt + Rstudio + Shiny
 
+----
+## NEED TO HAVE FIXED
+
+**SSL for all**
+It seems that only one of the containers aquire the SSL certificate. Maybey someone with more Nginx skills than me can have a look.
+
+**Upload limit**
+There seems to be an upload-limit when we're running behind Nginx. This can be fixed in the config file. If any knows how, please do.
+Here is a link I found regarding the issue: https://support.rstudio.com/hc/en-us/community/posts/200769376--Unexpected-response-from-server-error-with-file-upload
+
+## NICE TO HAVE FIXED
+
+**Multiple users in Rstudio Server**
+Would be nice to be able to create multiple users in Rstudio when firing up the docker container. 
+Maybe based on some of the information here: https://itsalocke.com/r-training-environment/
+
+----
+
+
+
 This code originated at https://github.com/gilyes/docker-nginx-letsencrypt-sample.
 
-This simple example shows how to set up multiple websites running behind a dockerized Nginx reverse proxy and served via HTTPS using free [Let's Encrypt](https://letsencrypt.org) certificates. New sites can be added on the fly by just modifying `docker-compose.yml` and then running `docker-compose up` as the main Nginx config is automatically updated and certificates (if needed) are automatically acquired.
+This simple example shows how to set up Rstudio Server and Shiny Server running behind a dockerized Nginx reverse proxy and served via HTTPS using free [Let's Encrypt](https://letsencrypt.org) certificates. New sites can be added on the fly by just modifying `docker-compose.yml` and then running `docker-compose up` as the main Nginx config is automatically updated and certificates (if needed) are automatically acquired.
 
-Some of the configuration is derived from <https://github.com/fatk/docker-letsencrypt-nginx-proxy-companion-examples> with some simplifications and updates to work with current `nginx.tmpl` from [nginx-proxy](https://github.com/jwilder/nginx-proxy) and docker-compose v2 files.
+Some of the configuration from the original repo is derived from <https://github.com/fatk/docker-letsencrypt-nginx-proxy-companion-examples> with some simplifications and updates to work with current `nginx.tmpl` from [nginx-proxy](https://github.com/jwilder/nginx-proxy) and docker-compose v2 files.
 
 ## Running the example
 ### Prerequisites
@@ -18,7 +38,6 @@ Some of the configuration is derived from <https://github.com/fatk/docker-letsen
   * Change the **VIRTUAL_HOST** and **LETSENCRYPT_HOST** entries from *rstudio.mydomain.com* and *shiny.mydomain.com* to your domains.
   * Change **LETSENCRYPT_EMAIL** entries to the email address you want to be associated with the certificates. 
   * Change **USER** and **PASSWORD** entries to the user and password you want for Rstudio.
-* In `volumes/config/sample-website/config.js` change **apiUrl** to your API endpoint as set up in the previous point in `docker-compose.yml`.
 
 ### Running
 In the main directory run: 
@@ -30,12 +49,12 @@ This will perform the following steps:
 
 * Download the required images from Docker Hub ([nginx](https://hub.docker.com/_/nginx/), [docker-gen](https://hub.docker.com/r/jwilder/docker-gen/), [docker-letsencrypt-nginx-proxy-companion](https://hub.docker.com/r/jrcs/letsencrypt-nginx-proxy-companion/)).
 * Create containers from them.
-* Build and create containers for the two sites located in `sample-websites`.
+* Build and create containers for Rstudio Server and Shiny Server
 * Start up the containers. 
   * *docker-letsencrypt-nginx-proxy-companion* inspects containers' metadata and tries to acquire certificates as needed (if successful then saving them in a volume shared with the host and the Nginx container).
   * *docker-gen* also inspects containers' metadata and generates the configuration file for the main Nginx reverse proxy
 
-If everything went well then you should now be able to access your website at the provided address.
+If everything went well then you should now be able to access Rstudio and Shiny and the given addresses.
 
 ### Troubleshooting
 * To view logs run `docker-compose logs`.
@@ -48,7 +67,7 @@ The system consists of 4 main parts:
 * Main Nginx reverse proxy container.
 * Container that generates the main Nginx config based on container metadata.
 * Container that automatically handles the acquisition and renewal of Let's Encrypt TLS certificates.
-* The actual websites living in their own containers. In this example, a very simple website, talking to a very simple API.
+* The actual servers living in their own containers. In this example Rstudio and Shiny.
 
 ### The main Nginx reverse proxy container
 This is the only publicly exposed container, routes traffic to the backend servers and provides TLS termination.
@@ -136,44 +155,55 @@ The container uses a volume shared with the host and the Nginx container to main
 
 It also mounts the Docker socket in order to inspect the other containers. See the security warning above in the docker-gen section about the risks of that.
 
-### The sample website and the sample API 
-These two very simple samples are running in their own respective containers. They are defined in `docker-compose.yml` under the **sample-api** and **sample-website** service blocks: 
+### The Rstudio Server and Shiny Server
+These two servers are running in their own respective containers. They are defined in `docker-compose.yml` under the **tidyverse** and **shiny** service blocks: 
 
 ```
 services:
   ...
 
-  sample-api:
+  tidyverse:
     restart: always
-    image: sample-api
-    build: ./samples/api
-    container_name: sample-api
+    image: rocker/tidyverse
+    container_name: rstudio
+    expose:
+      - "8787"
     environment:
-      - VIRTUAL_HOST=sampleapi.example.com
-      - VIRTUAL_NETWORK=nginx-proxy
-      - VIRTUAL_PORT=3000
-      - LETSENCRYPT_HOST=sampleapi.example.com
-      - LETSENCRYPT_EMAIL=email@example.com
-
-  sample-website:
-    restart: always
-    image: sample-website
-    build: ./samples/website
-    container_name: sample-website
-    volumes:
-      - "./volumes/nginx-sample-website/conf.d/:/etc/nginx/conf.d"
-      - "./volumes/config/sample-website/config.js:/usr/share/nginx/html/config.js"
-    environment:
-      - VIRTUAL_HOST=samplewebsite.example.com
+      - VIRTUAL_HOST=rstudio.mydomain.com
       - VIRTUAL_NETWORK=nginx-proxy
       - VIRTUAL_PORT=80
-      - LETSENCRYPT_HOST=sample.example.com
-      - LETSENCRYPT_EMAIL=email@example.com
-```
-The important part here are the environment variables. These are used by the config generator and certificate maintainer containers to set up the system.
+      - LETSENCRYPT_HOST=rstudio.mydomain.com
+      - LETSENCRYPT_EMAIL=me@myemail.com
+      - USER=test
+      - PASSWORD=test
+    volumes:
+      - shiny-apps:/home/mikkel/apps
+      - r-packages:/usr/local/lib/R/site-library
 
-The source code for these two images is in the `samples` subfolder, the images are built from there. In a real-world scenario these images would likely come from a Docker registry.
+  shiny:
+    restart: always
+    image: rocker/shiny
+    container_name: shiny
+    expose:
+      - "3838"
+    environment:
+      - VIRTUAL_HOST=shiny.mydomain.com
+      - VIRTUAL_NETWORK=nginx-proxy
+      - VIRTUAL_PORT=80
+      - LETSENCRYPT_HOST=shiny.mydomain.com
+      - LETSENCRYPT_EMAIL=me@myemail.com
+    volumes:
+      - shiny-apps:/srv/shiny-server/
+      - ./volumes/shiny/logs:/var/log/
+      - r-packages:/usr/local/lib/R/site-library
+```
+The important part here are the environment variables and the volumes. The environment variables are used by the config generator and certificate maintainer containers to set up the system.
+
+### The data volumes
+
+The volumes are used to ensure that Rstudio and Shiny share apps and packages in order for you to build apps in Rstudio and have them deployed on the Shiny server without too big a hassle.
+
 
 ## Conclusion
-This can be a fairly simple way to have easy, reproducible deploys for websites with free, auto-renewing TLS certificates. 
+This can be a fairly simple way to have easy, reproducible deploys for a secure R-based dashboard solution with auto-renewing TLS certificates. 
 
