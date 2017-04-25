@@ -44,13 +44,13 @@ services:
     expose:
       - "8787"
     environment:
-      - VIRTUAL_HOST=rstudio_dash.56n.dk
+      - VIRTUAL_HOST=rstudio.mydomain.com
       - VIRTUAL_NETWORK=nginx-proxy
       - VIRTUAL_PORT=80
-      - LETSENCRYPT_HOST=rstudio_dash.56n.dk
-      - LETSENCRYPT_EMAIL=mikkel@56n.dk
-      - USER=mikkel
-      - PASSWORD=lolita22
+      - LETSENCRYPT_HOST=rstudio.mydomain.com
+      - LETSENCRYPT_EMAIL=me@myemail.com
+      - USER=test
+      - PASSWORD=test
     volumes:
       - shiny-apps:/home/mikkel/apps
       - r-packages:/usr/local/lib/R/site-library
@@ -62,11 +62,11 @@ services:
     expose:
       - "3838"
     environment:
-      - VIRTUAL_HOST=dashboard.56n.dk
+      - VIRTUAL_HOST=shiny.mydomain.com
       - VIRTUAL_NETWORK=nginx-proxy
       - VIRTUAL_PORT=80
-      - LETSENCRYPT_HOST=dashboard.56n.dk
-      - LETSENCRYPT_EMAIL=mikkel@56n.dk
+      - LETSENCRYPT_HOST=shiny.mydomain.com
+      - LETSENCRYPT_EMAIL=me@myemail.com
     volumes:
       - shiny-apps:/srv/shiny-server/
       - ./volumes/shiny/logs:/var/log/
