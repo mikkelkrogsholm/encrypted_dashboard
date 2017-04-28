@@ -7,11 +7,6 @@
 
 It seems that only one of the containers aquire the SSL certificate. Maybey someone with more Nginx skills than me can have a look.
 
-**Upload limit**
-
-There seems to be an upload-limit when we're running behind Nginx. This can be fixed in the config file. If any knows how, please do.
-Here is a link I found regarding the issue: https://support.rstudio.com/hc/en-us/community/posts/200769376--Unexpected-response-from-server-error-with-file-upload
-
 ## NICE TO HAVE FIXED
 
 **Multiple users in Rstudio Server**
