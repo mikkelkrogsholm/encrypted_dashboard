@@ -54,10 +54,10 @@ services:
       - VIRTUAL_PORT=80
       - LETSENCRYPT_HOST=rstudio.mydomain.com
       - LETSENCRYPT_EMAIL=me@myemail.com
-      - USER=test
-      - PASSWORD=test
+      - USER=YOUR_USER
+      - PASSWORD=YOUR_PASSWORD
     volumes:
-      - shiny-apps:/home/mikkel/apps
+      - shiny-apps:/home/YOUR_USER/apps
       - r-packages:/usr/local/lib/R/site-library
 
   shiny:
