@@ -3,9 +3,7 @@
 ----
 ## NEED TO HAVE FIXED
 
-**SSL for all**
-
-It seems that only one of the containers aquire the SSL certificate. Maybey someone with more Nginx skills than me can have a look.
+Up to date
 
 ## NICE TO HAVE FIXED
 
