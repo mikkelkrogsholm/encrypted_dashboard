@@ -56,7 +56,7 @@ services:
   #     - LETSENCRYPT_HOST=rstudio.mydomain.com
   #     - LETSENCRYPT_EMAIL=me@myemail.com
   #   volumes:
-  #     - shiny-apps:/home/YOUR_USER/apps
+  #     - shiny-apps:/home/shiny/apps # Remember to add shiny as a user
   #     - r-packages:/usr/local/lib/R/site-library
 
   tidyverse:
