@@ -1,4 +1,4 @@
-FROM rocker/r-ver
+FROM rocker/r-ver:3.4.0
 
 ARG RSTUDIO_VERSION
 ARG PANDOC_TEMPLATES_VERSION 
