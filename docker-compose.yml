@@ -44,7 +44,7 @@ services:
       
   tidyverse:
     restart: always
-    build: ./rstudio
+    image: mikkelkrogsholm/rstudio
     container_name: rstudio
     expose:
       - "8787"
