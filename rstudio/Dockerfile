@@ -1,4 +1,4 @@
-FROM rocker/r-ver:3.4.0
+FROM mikkelkrogsholm/r_with_benefits
 
 ARG RSTUDIO_VERSION
 ARG PANDOC_TEMPLATES_VERSION 
@@ -68,24 +68,6 @@ RUN apt-get update \
    && echo '#!/bin/bash \
            \n rstudio-server stop' \
            > /etc/services.d/rstudio/finish
-
-## Add the Tidyverse
-RUN apt-get update -qq && apt-get -y --no-install-recommends install \
-  libxml2-dev \
-  libcairo2-dev \
-  libsqlite-dev \
-  libmariadbd-dev \
-  libmariadb-client-lgpl-dev \
-  libpq-dev \
-  && R -e "source('https://bioconductor.org/biocLite.R')" \
-  && install2.r --error \
-    --deps TRUE \
-    tidyverse \
-    dplyr \
-    ggplot2 \
-    devtools \
-    formatR \
-    remotes
 
 COPY userconf.sh /etc/cont-init.d/userconf
 
