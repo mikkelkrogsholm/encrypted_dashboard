@@ -1,4 +1,4 @@
-FROM mikkelkrogsholm/r_with_benefits
+FROM mikkelkrogsholm/r
 
 ARG RSTUDIO_VERSION
 ARG PANDOC_TEMPLATES_VERSION 
@@ -10,20 +10,7 @@ ENV PATH /usr/lib/rstudio-server/bin:$PATH
 ## Download and install RStudio server & dependencies
 ## Attempts to get detect latest version, otherwise falls back to version given in $VER
 ## Symlink pandoc, pandoc-citeproc so they are available system-wide
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-    file \
-    git \
-    libapparmor1 \
-    libcurl4-openssl-dev \
-    libedit2 \
-    libssl-dev \
-    lsb-release \
-    psmisc \
-    python-setuptools \
-    sudo \
-    wget \ 
-  && RSTUDIO_LATEST=$(wget --no-check-certificate -qO- https://s3.amazonaws.com/rstudio-server/current.ver) \
+RUN RSTUDIO_LATEST=$(wget --no-check-certificate -qO- https://s3.amazonaws.com/rstudio-server/current.ver) \
   && [ -z "$RSTUDIO_VERSION" ] && RSTUDIO_VERSION=$RSTUDIO_LATEST || true \
   && wget -q http://download2.rstudio.org/rstudio-server-${RSTUDIO_VERSION}-amd64.deb \
   && dpkg -i rstudio-server-${RSTUDIO_VERSION}-amd64.deb \
