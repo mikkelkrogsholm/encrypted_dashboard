@@ -1,39 +1,56 @@
-# Docker + Nginx + Let's Encrypt + Rstudio + Shiny
+# Encrypted Dashboard based on docker
+## + Nginx + Let's Encrypt + Rstudio + Shiny 
+## based on custom made debian full with different libraries and
+## an R version with a lot of pre-installed libraries. 
 
 ----
-## NEED TO HAVE FIXED
+### NEED TO HAVE
+Up to date - please open an issue or commit new things
 
-Up to date
-
-## NICE TO HAVE FIXED
-
-**Multiple users in Rstudio Server**
-
-Would be nice to be able to create multiple users in Rstudio when firing up the docker container. 
-Maybe based on some of the information here: https://itsalocke.com/r-training-environment/
+### NICE TO HAVE
+Add a netdata.io docker to monitor the performance of the setup.
+Add a postgres docker as an example of a connected database.
 
 ----
 
+Baiscally I started with the code from these two repos:
+
+https://github.com/gilyes/docker-nginx-letsencrypt-sample
+https://github.com/fatk/docker-letsencrypt-nginx-proxy-companion-examples
+
+What they did was to create a website running behind a dockerized Nginx reverse proxy and served via HTTPS using free [Let's Encrypt](https://letsencrypt.org) certificates. New sites could be added on the fly by just modifying `docker-compose.yml` and then running `docker-compose up` as the main Nginx config is automatically updated and certificates (if needed) are automatically acquired.
+
+# BUT
+
+I wanted to build an encrypted Shiny Dashboard with an Rstudio Server that would run in seperate docker containers and be served at different urls.
+
+The problem here is to share settings, code and libraries between the two docker containers. In order to do that I have done the following:
+
+### Debian image
+I have created a custom debian image that basically installs all the libraries need for linux to install R, Shiny and Rstudio along with a lot dependencies for different R packages. I did this to lay a commom foundation for the R image and the following Shiny and Rstudio images. They need the same infrastructure to work properly.
+You can inspect the docker file in the debian folder and pull the image from: https://hub.docker.com/r/mikkelkrogsholm/debian/
+
+### R image
+I built my own R image on top of the debian image. 
+You can inspect the docker file in the r folder and pull the image from: https://hub.docker.com/r/mikkelkrogsholm/r-base/
+
+### Rstudio and Shiny
+Both Rstudio and Shiny are then built on top of the R image. This means that they all share the same dependencies and libraries. There shouldn't be any problem transferring R code from Rstudio to Shiny since the underlying R image is the same and they don't have different dependencies installed on the linux side.
+
+You can inspect the Rstudio docker file in the rstudio folder and pull the image from: https://hub.docker.com/r/mikkelkrogsholm/rstudio/
+
+You can inspect the Shiny docker file in the shiny folder and pull the image from: https://hub.docker.com/r/mikkelkrogsholm/shiny/
 
 
-This code originated at https://github.com/gilyes/docker-nginx-letsencrypt-sample.
-
-This simple example shows how to set up Rstudio Server and Shiny Server running behind a dockerized Nginx reverse proxy and served via HTTPS using free [Let's Encrypt](https://letsencrypt.org) certificates. New sites can be added on the fly by just modifying `docker-compose.yml` and then running `docker-compose up` as the main Nginx config is automatically updated and certificates (if needed) are automatically acquired.
-
-Some of the configuration from the original repo is derived from <https://github.com/fatk/docker-letsencrypt-nginx-proxy-companion-examples> with some simplifications and updates to work with current `nginx.tmpl` from [nginx-proxy](https://github.com/jwilder/nginx-proxy) and docker-compose v2 files.
-
-## Running the example
-### Prerequisites
-* [docker](https://docs.docker.com/engine/installation/) (>= 1.10)
-* [docker-compose](https://github.com/docker/compose/releases) (>= 1.8.1)
-* access to (sub)domain(s) pointing to a publicly accessible server (required for TLS)
+## Setup your dashboard
 
 ### Preparation
 * Clone the [repository](https://github.com/56north/encrypted_dashboard) on the server pointed to by your domain. 
 * In `docker-compose.yml`: 
-  * Change the **VIRTUAL_HOST** and **LETSENCRYPT_HOST** entries from *rstudio.mydomain.com* and *shiny.mydomain.com* to your domains.
-  * Change **LETSENCRYPT_EMAIL** entries to the email address you want to be associated with the certificates. 
-  * Change **USER** and **PASSWORD** entries to the user and password you want for Rstudio.
+* Choose if you want a single user setup or multiuser setup in Rstudio.
+* Change the **VIRTUAL_HOST** and **LETSENCRYPT_HOST** entries from *rstudio.mydomain.com* and *shiny.mydomain.com* to your domains.
+* Change **LETSENCRYPT_EMAIL** entries to the email address you want to be associated with the certificates. 
+* Change **USER** and **PASSWORD** entries to the user and password you want for Rstudio.
 
 ### Running
 In the main directory run: 
@@ -152,7 +169,7 @@ The container uses a volume shared with the host and the Nginx container to main
 It also mounts the Docker socket in order to inspect the other containers. See the security warning above in the docker-gen section about the risks of that.
 
 ### The Rstudio Server and Shiny Server
-These two servers are running in their own respective containers. They are defined in `docker-compose.yml` under the **tidyverse** and **shiny** service blocks: 
+This example shows the single user case. These two servers are running in their own respective containers. They are defined in `docker-compose.yml` under the **tidyverse** and **shiny** service blocks: 
 
 ```
 services:
@@ -160,7 +177,7 @@ services:
 
   tidyverse:
     restart: always
-    image: rocker/tidyverse
+    image: mikkelkrogsholm/rstudio
     container_name: rstudio
     expose:
       - "8787"
@@ -178,7 +195,7 @@ services:
 
   shiny:
     restart: always
-    image: rocker/shiny
+    image: mikkelkrogsholm/shiny
     container_name: shiny
     expose:
       - "3838"
