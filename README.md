@@ -1,22 +1,21 @@
 # Encrypted Dashboard based on docker
-## + Nginx + Let's Encrypt + Rstudio + Shiny 
-## based on custom made debian full with different libraries and
-## an R version with a lot of pre-installed libraries. 
+## + Nginx + Let's Encrypt + Rstudio + Shiny based on custom made debian full with different libraries and an R version with a lot of pre-installed libraries. 
 
 ----
 ### NEED TO HAVE
 Up to date - please open an issue or commit new things
 
 ### NICE TO HAVE
-Add a netdata.io docker to monitor the performance of the setup.
+Add a netdata.io docker to monitor the performance of the setup.     
 Add a postgres docker as an example of a connected database.
 
 ----
 
-Baiscally I started with the code from these two repos:
+Basically I started with the code from these two repos:
 
-https://github.com/gilyes/docker-nginx-letsencrypt-sample
-https://github.com/fatk/docker-letsencrypt-nginx-proxy-companion-examples
+https://github.com/gilyes/docker-nginx-letsencrypt-sample .    
+https://github.com/fatk/docker-letsencrypt-nginx-proxy-companion-examples .     
+
 
 What they did was to create a website running behind a dockerized Nginx reverse proxy and served via HTTPS using free [Let's Encrypt](https://letsencrypt.org) certificates. New sites could be added on the fly by just modifying `docker-compose.yml` and then running `docker-compose up` as the main Nginx config is automatically updated and certificates (if needed) are automatically acquired.
 
