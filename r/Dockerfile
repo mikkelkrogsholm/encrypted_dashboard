@@ -12,14 +12,14 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
   && locale-gen en_US.utf8 \
   && /usr/sbin/update-locale LANG=en_US.UTF-8 \
   && cd tmp/ \
-  
+
   ## Download source code
   && curl -O https://cran.r-project.org/src/base/R-3/R-${R_VERSION}.tar.gz \
-  
+
   ## Extract source code
   && tar -xf R-${R_VERSION}.tar.gz \
   && cd R-${R_VERSION} \
-  
+
   ## Set compiler flags
   && R_PAPERSIZE=letter \
     R_BATCHSAVE="--no-save --no-restore" \
@@ -33,7 +33,7 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
     AWK=/usr/bin/awk \
     CFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g" \
     CXXFLAGS="-g -O2 -fstack-protector-strong -Wformat -Werror=format-security -Wdate-time -D_FORTIFY_SOURCE=2 -g" \
-  
+
   ## Configure options
   ./configure --enable-R-shlib \
                --enable-memory-profiling \
@@ -41,36 +41,36 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
                --with-blas="-lopenblas" \
                --disable-nls \
                --without-recommended-packages \
-  
+
   ## Build and install
   && make \
   && make install \
-  
+
   ## Add a default CRAN mirror
   && echo "options(repos = c(CRAN = 'https://cran.rstudio.com/'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site \
-  
+
   ## Add a library directory (for user-installed packages)
   && mkdir -p /usr/local/lib/R/site-library \
   && chown root:staff /usr/local/lib/R/site-library \
   && chmod g+wx /usr/local/lib/R/site-library \
-  
+
   ## Fix library path
   && echo "R_LIBS_USER='/usr/local/lib/R/site-library'" >> /usr/local/lib/R/etc/Renviron \
   && echo "R_LIBS=\${R_LIBS-'/usr/local/lib/R/site-library:/usr/local/lib/R/library:/usr/lib/R/library'}" >> /usr/local/lib/R/etc/Renviron \
-  
+
   ## install packages from date-locked MRAN snapshot of CRAN
   && [ -z "$BUILD_DATE" ] && BUILD_DATE=$(TZ="America/Los_Angeles" date -I) || true \
   && MRAN=https://mran.microsoft.com/snapshot/${BUILD_DATE} \
   && echo MRAN=$MRAN >> /etc/environment \
   && export MRAN=$MRAN \
-  
+
   ## MRAN becomes default only in versioned images
   ## Use littler installation scripts
   && Rscript -e "install.packages(c('littler', 'docopt'), repo = '$MRAN')" \
   && ln -s /usr/local/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
   && ln -s /usr/local/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
   && ln -s /usr/local/lib/R/site-library/littler/bin/r /usr/local/bin/r \
-  
+
   ## Clean up from R source install
   && cd / \
   && rm -rf /tmp/* \
@@ -84,7 +84,10 @@ RUN R CMD javareconf
 ## Add the Tidyverse
 RUN Rscript -e 'install.packages(c("tidyverse", "devtools", dependencies = TRUE), repos = "https://cran.rstudio.com")'
 
-## Add the dashboard packages
+## Add other usefull packages
 RUN Rscript -e 'install.packages(c("rgdal", "rJava", "bcrypt", "shiny", "rmarkdown", "knitr",  "shinydashboard", "data.table", "mailR", "shinyjs", "DT", "leaflet", dependencies = TRUE), repos = "https://cran.rstudio.com")'
+
+RUN Rscript -e 'install.packages(c("rio", "RPostgreSQL", "pacman", "xts", "dygraphs", "plotly", "highcharter", "listviewer", dependencies = TRUE), repos = "https://cran.rstudio.com")'
+
 
 CMD ["R"]
