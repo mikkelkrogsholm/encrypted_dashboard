@@ -87,7 +87,7 @@ RUN Rscript -e 'install.packages(c("tidyverse", "devtools", dependencies = TRUE)
 ## Add other usefull packages
 RUN Rscript -e 'install.packages(c("rgdal", "rJava", "bcrypt", "shiny", "rmarkdown", "knitr",  "shinydashboard", "data.table", "mailR", "shinyjs", "DT", "leaflet", dependencies = TRUE), repos = "https://cran.rstudio.com")'
 
-RUN Rscript -e 'install.packages(c("rio", "RPostgreSQL", "pacman", "xts", "dygraphs", "plotly", "highcharter", "listviewer", dependencies = TRUE), repos = "https://cran.rstudio.com")'
+RUN Rscript -e 'install.packages(c("rio", "RPostgreSQL", "pacman", "xts", "dygraphs", "plotly", "highcharter", "listviewer", "testthat", "reporteRs", "selectr", "pbapply", dependencies = TRUE), repos = "https://cran.rstudio.com")'
 
 
 CMD ["R"]
