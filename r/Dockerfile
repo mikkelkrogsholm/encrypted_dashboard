@@ -82,12 +82,14 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
 RUN R CMD javareconf
 
 ## Add the Tidyverse
-RUN Rscript -e 'install.packages(c("tidyverse", "devtools", dependencies = TRUE), repos = "https://cran.rstudio.com")'
+RUN Rscript -e 'install.packages(c("tidyverse", "devtools"), dependencies = TRUE,
+repos = "https://cran.rstudio.com")'
 
 ## Add other usefull packages
-RUN Rscript -e 'install.packages(c("rgdal", "rJava", "bcrypt", "shiny", "rmarkdown", "knitr",  "shinydashboard", "data.table", "mailR", "shinyjs", "DT", "leaflet", dependencies = TRUE), repos = "https://cran.rstudio.com")'
-
-RUN Rscript -e 'install.packages(c("rio", "RPostgreSQL", "pacman", "xts", "dygraphs", "plotly", "highcharter", "listviewer", "testthat", "reporteRs", "selectr", "pbapply", dependencies = TRUE), repos = "https://cran.rstudio.com")'
-
+RUN Rscript -e 'install.packages(c("rgdal", "rJava", "bcrypt", "shiny", "rmarkdown",
+"knitr","shinydashboard", "data.table", "mailR", "shinyjs", "DT", "leaflet", "rio",
+"RPostgreSQL", "pacman", "xts", "dygraphs", "plotly", "highcharter", "listviewer",
+"testthat", "ReporteRs", "selectr", "pbapply", "googlesheets", "timevis", "owmr"),
+dependencies = TRUE, repos = "https://cran.rstudio.com")'
 
 CMD ["R"]
