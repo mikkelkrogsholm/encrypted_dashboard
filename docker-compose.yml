@@ -113,13 +113,13 @@ services:
 # Watchtower is a process for watching your Docker containers and automatically
 # updating and restarting them whenever their base image is refreshed.
   watchtower:
+    restart: always
     image: v2tec/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.docker/config.json:/config.json
-    command:
-      --schedule "0 0 0 *" # Look for new images every midnight
-      --cleanup # Removes old images
+    # Look for new images every midnight and Removes old images
+    command: --schedule "0 0 0 *" --cleanup
 
 # Create data docker volumes
 volumes:
