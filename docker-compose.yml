@@ -111,7 +111,7 @@ services:
       - backup:/home/
 
 # Watchtower is a process for watching your Docker containers and automatically
-# restarting them whenever their base image is refreshed.
+# updating and restarting them whenever their base image is refreshed.
   watchtower:
     image: v2tec/watchtower
     volumes:
@@ -119,10 +119,10 @@ services:
       - /root/.docker/config.json:/config.json
     command:
       --schedule "0 0 0 *" # Look for new images every midnight
-      --cleanup
+      --cleanup # Removes old images
 
 # Create data docker volumes
 volumes:
-  shiny-apps:
-  r-packages:
-  backup:
+  shiny-apps: # holds the shiny apps
+  r-packages: # holds new common libraries
+  backup: # makes backup of the /home folder in Rstudio docker.
